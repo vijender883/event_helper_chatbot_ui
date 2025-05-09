@@ -5,11 +5,7 @@ import json
 import io
 import os
 from dotenv import load_dotenv
-
-
-# name of the pdf file should be context.pdf
-# pdf file should be in the same directory as this script
-
+import html
 
 # Load environment variables
 load_dotenv()
@@ -31,6 +27,7 @@ class EventAssistantBot:
 8. If unsure about any information, acknowledge uncertainty rather than guess
 9. You may suggest a few general questions users might want to ask about the event
 10. Remember to maintain a warm, friendly tone in all interactions
+11. You should refer to yourself as "Event Bot"
 
 Remember: While you can be conversational, your primary role is providing accurate information about this specific event based on the context provided.
         """
@@ -96,46 +93,118 @@ Remember: While you can be conversational, your primary role is providing accura
 
 # Set page configuration
 st.set_page_config(
-    page_title="Event Assistant",
+    page_title="Build with AI - Event Bot",
     page_icon="🎫",
     layout="centered"
 )
 
-# Add CSS for styling
+# Create CSS for styling
 st.markdown("""
-    <style>
-    .main {
-        padding: 2rem;
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    .stButton>button {
-        width: 100%;
-    }
-    .chat-message {
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        display: flex;
-    }
-    .chat-message.user {
-        background-color: #f0f2f6;
-    }
-    .chat-message.bot {
-        background-color: #e6f3ff;
-    }
-    .chat-message .content {
-        width: 100%;
-    }
-    /* Hide Streamlit elements for cleaner interface */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stDeployButton {display:none;}
-    </style>
-    """, unsafe_allow_html=True)
+<style>
+/* Basic app styling */
+body {
+    background-color: #0E1117;
+    color: white;
+}
 
-# Main app title with minimalist design
-st.title("Event Information Assistant")
+/* Custom chat container */
+.custom-chat-container {
+    background-color: white;
+    color: black;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+    min-height: 400px;
+    max-height: 700px;
+    overflow-y: auto;
+}
+
+/* User message bubble */
+.user-message {
+    background-color: #e6e6e6;
+    color: black;
+    border-radius: 15px;
+    padding: 10px 15px;
+    margin: 10px 0;
+    text-align: right;
+    max-width: 70%;
+    margin-left: auto;
+}
+
+/* Bot message bubble */
+.bot-message {
+    background-color: #fcf8ed;
+    color: black;
+    border-radius: 15px;
+    padding: 10px 15px;
+    margin: 10px 0;
+    text-align: left;
+    max-width: 70%;
+}
+
+/* Hide streamlit branding */
+.reportview-container .main footer {
+    visibility: hidden;
+}
+.stDeployButton {
+    display: none;
+}
+
+/* Make sure chat container is clean */
+.custom-chat-container p {
+    margin: 0;
+    padding: 0;
+    color: black !important;
+}
+
+/* Handle chat icons */
+.avatar-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin-right: 5px;
+    text-align: center;
+    line-height: 24px;
+    background-color: #F0C05A;
+    color: black;
+    border-radius: 50%;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.user-avatar-icon {
+    background-color: #FF4B4B;
+    color: white;
+}
+
+/* Message container with icon */
+.message-container {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.message-container.user {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+/* Fix for user avatar position */
+.message-container.user .avatar-icon {
+    margin-right: 0;
+    margin-left: 5px;
+}
+
+/* Force element color overrides */
+.custom-chat-container * {
+    color: black !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Main app title
+st.title("Build with AI - Event Bot")
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
@@ -160,13 +229,33 @@ if "bot" not in st.session_state:
     # Add welcome message
     if not st.session_state.messages:
         st.session_state.messages.append(
-            {"role": "assistant", "content": "Hello! I'm your Event Information Assistant. How can I help you with information about this event?"}
+            {"role": "assistant", "content": "Hello! I'm Event bot. How can I help you with information about this event?"}
         )
 
-# Display chat history
+# Custom Chat UI Implementation - Completely bypassing Streamlit's chat components
+# Open a container div for the chat
+chat_html = '<div class="custom-chat-container">'
+
+# Add all messages to the custom chat HTML
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+    if message["role"] == "user":
+        avatar = '<div class="avatar-icon user-avatar-icon">👤</div>'
+        chat_html += f'<div class="message-container user">'
+        chat_html += avatar
+        chat_html += f'<div class="user-message">{html.escape(message["content"])}</div>'
+        chat_html += '</div>'
+    else:  # assistant
+        avatar = '<div class="avatar-icon">🤖</div>'
+        chat_html += f'<div class="message-container">'
+        chat_html += avatar
+        chat_html += f'<div class="bot-message">{html.escape(message["content"])}</div>'
+        chat_html += '</div>'
+
+# Close the container div
+chat_html += '</div>'
+
+# Render the custom chat container
+st.markdown(chat_html, unsafe_allow_html=True)
 
 # Chat input
 user_input = st.chat_input("Ask a question about the event...")
@@ -175,15 +264,12 @@ if user_input:
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": user_input})
     
-    # Display user message
-    with st.chat_message("user"):
-        st.write(user_input)
-    
     # Generate response
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            response = st.session_state.bot.answer_question(user_input)
-            st.write(response)
+    with st.spinner("Thinking..."):
+        response = st.session_state.bot.answer_question(user_input)
     
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": response})
+    
+    # Rerun to update the UI
+    st.rerun()
