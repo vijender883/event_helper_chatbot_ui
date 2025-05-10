@@ -1,3 +1,4 @@
 /cvenv
 .env
 /__pycache__
+/venv
