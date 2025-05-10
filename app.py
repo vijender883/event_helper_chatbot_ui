@@ -166,6 +166,8 @@ if "bot" not in st.session_state:
     with st.spinner("Initializing assistant..."):
         st.session_state.bot = EventAssistantBot(api_key, pdf_path)
     
+
+    #this si welcome
     # Add welcome message with options
     if not st.session_state.messages:
         welcome_message = """Hello! I'm Event bot.
