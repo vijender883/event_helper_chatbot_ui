@@ -98,107 +98,18 @@ st.set_page_config(
     layout="centered"
 )
 
-# Create CSS for styling
-st.markdown("""
-<style>
-/* Basic app styling */
-body {
-    background-color: #0E1117;
-    color: white;
-}
+# Load the CSS from the external file
+def load_css(css_file):
+    with open(css_file, 'r') as f:
+        css = f.read()
+    return css
 
-/* Custom chat container */
-.custom-chat-container {
-    background-color: white;
-    color: black;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    width: 100%;
-    min-height: 400px;
-    max-height: 700px;
-    overflow-y: auto;
-}
-
-/* Message container with icon - UPDATED FOR TOP ALIGNMENT */
-.message-container {
-    display: flex;
-    align-items: flex-start;  /* Changed from center to flex-start */
-    margin-bottom: 15px;
-    width: 100%;
-}
-
-.message-container.user {
-    flex-direction: row-reverse;
-}
-
-/* Avatar icon styling */
-.avatar-icon {
-    display: inline-flex;
-    width: 32px;
-    height: 32px;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    background-color: #F0C05A;
-    color: black;
-    border-radius: 50%;
-    font-weight: bold;
-    flex-shrink: 0;
-    margin-right: 8px;
-    margin-top: 5px;  /* Added for top alignment fine-tuning */
-}
-
-.user-avatar-icon {
-    background-color: #FF4B4B;
-    color: white;
-    margin-right: 0;
-    margin-left: 8px;
-}
-
-/* Message bubbles */
-.bot-message {
-    background-color: #fcf8ed;
-    color: black;
-    border-radius: 15px;
-    padding: 10px 15px;
-    text-align: left;
-    max-width: 70%;
-}
-
-.user-message {
-    background-color: #e6e6e6;
-    color: black;
-    border-radius: 15px;
-    padding: 10px 15px;
-    text-align: left;
-    max-width: 70%;
-}
-
-/* Hide streamlit branding */
-.reportview-container .main footer {
-    visibility: hidden;
-}
-.stDeployButton {
-    display: none;
-}
-
-/* Make sure chat container is clean */
-.custom-chat-container p {
-    margin: 0;
-    padding: 0;
-    color: black !important;
-}
-
-/* Force element color overrides */
-.custom-chat-container * {
-    color: black !important;
-}
-</style>
-""", unsafe_allow_html=True)
+# Load and apply CSS
+css = load_css("styles.css")
+st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 # Main app title
-st.title("Build with AI1 - Event Bot")
+st.title("Build with AI - Event Bot")
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
