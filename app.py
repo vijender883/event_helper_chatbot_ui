@@ -48,6 +48,40 @@ Remember: While you can be conversational, your primary role is providing accura
             st.error(f"Error extracting PDF: {str(e)}")
             return ""
 
+    def post_process_response(self, response, query):
+        """Format responses for better readability based on query type."""
+        # If it's a lunch-related query, format the response
+        if "lunch" in query.lower() or "food" in query.lower() or "eat" in query.lower():
+            # Just start with "Regarding lunch:" without the greeting
+            formatted = "Regarding lunch:\n\n"
+            
+            # Split into readable bullet points
+            points = []
+            
+            # Extract key information using common phrases and format as separate points
+            if "provided to all" in response:
+                points.append("• Lunch will be provided to all participants who have checked in at the venue.")
+            if "cafeteria" in response.lower() and "floor" in response.lower():
+                # Extract time info if available
+                time_info = ""
+                if "1:00" in response and "2:00" in response:
+                    time_info = "between 1:00 PM and 2:00 PM IST"
+                points.append(f"• It will be served in the Cafeteria on the 5th floor {time_info}.")
+            if "check-in" in response.lower() or "registration" in response.lower():
+                points.append("• Please ensure you've completed the check-in process at the registration desk to be eligible.")
+            if "volunteer" in response.lower() or "direction" in response.lower():
+                points.append("• Feel free to ask a volunteer if you need directions to the cafeteria.")
+                
+            # If we couldn't extract structured points, just use the original
+            if not points:
+                return response
+                
+            # Combine all points with line breaks
+            return formatted + "\n".join(points)
+        
+        # For other responses, just return the original
+        return response
+
     def answer_question(self, query):
         """Use Google Gemini to answer a question based on PDF context."""
         try:
@@ -82,7 +116,8 @@ Remember: While you can be conversational, your primary role is providing accura
                     if "text" in part:
                         text_parts.append(part["text"])
                 
-                return "\n".join(text_parts)
+                raw_response = "\n".join(text_parts)
+                return self.post_process_response(raw_response, query)
             else:
                 if "error" in response_data:
                     return f"Error: {response_data['error']['message']}"
@@ -131,11 +166,46 @@ if "bot" not in st.session_state:
     with st.spinner("Initializing assistant..."):
         st.session_state.bot = EventAssistantBot(api_key, pdf_path)
     
-    # Add welcome message
+    # Add welcome message with options
     if not st.session_state.messages:
+        welcome_message = """Hello! I'm Event bot.
+I can help you with the following:
+1. Agenda of the "Build with AI" workshop
+2. Important Dates of this workshop
+3. Details of the AI Hackathon
+4. Presentation of Interesting projects in AI, ML
+5. Locating the washrooms
+6. Details of lunch at the venue
+
+How can I help you with information about this event?"""
+        
         st.session_state.messages.append(
-            {"role": "assistant", "content": "Hello! I'm Event bot. How can I help you with information about this event?"}
+            {"role": "assistant", "content": welcome_message}
         )
+
+# Add additional CSS to fix spacing issues
+st.markdown("""
+<style>
+.bot-message {
+    white-space: pre-line !important;
+    line-height: 1.5 !important;
+    margin-bottom: 0 !important;
+}
+.bot-message ol {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    padding-left: 25px !important;
+}
+.bot-message li {
+    margin-bottom: 6px !important;
+    padding-bottom: 0 !important;
+    line-height: 1.4 !important;
+}
+.bot-message p {
+    margin-bottom: 10px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Custom Chat UI Implementation - Completely bypassing Streamlit's chat components
 # Open a container div for the chat
@@ -153,7 +223,22 @@ for message in st.session_state.messages:
         avatar = '<div class="avatar-icon">🤖</div>'
         chat_html += f'<div class="message-container">'
         chat_html += avatar
-        chat_html += f'<div class="bot-message">{html.escape(message["content"])}</div>'
+        # Format the welcome message to be more compact
+        formatted_content = message["content"]
+        if "I can help you with the following:" in formatted_content:
+            # Replace the original formatting with HTML formatting
+            formatted_content = formatted_content.replace("Hello! I'm Event bot.\nI can help you with the following:", 
+                                                          "Hello! I'm Event bot.<br><br>I can help you with the following:")
+            formatted_content = formatted_content.replace("\n1. ", "<ol style='margin-top:8px;margin-bottom:8px;padding-left:25px;'><li style='margin-bottom:4px;'>")
+            formatted_content = formatted_content.replace("\n2. ", "</li><li style='margin-bottom:4px;'>")
+            formatted_content = formatted_content.replace("\n3. ", "</li><li style='margin-bottom:4px;'>")
+            formatted_content = formatted_content.replace("\n4. ", "</li><li style='margin-bottom:4px;'>")
+            formatted_content = formatted_content.replace("\n5. ", "</li><li style='margin-bottom:4px;'>")
+            formatted_content = formatted_content.replace("\n6. ", "</li><li style='margin-bottom:4px;'>")
+            formatted_content = formatted_content.replace("\n\nHow can I help you", "</li></ol><br>How can I help you")
+            chat_html += f'<div class="bot-message">{formatted_content}</div>'
+        else:
+            chat_html += f'<div class="bot-message">{html.escape(message["content"])}</div>'
         chat_html += '</div>'
 
 # Close the container div
