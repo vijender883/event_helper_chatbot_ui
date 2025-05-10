@@ -168,7 +168,7 @@ if "bot" not in st.session_state:
     
     # Add welcome message with options
     if not st.session_state.messages:
-        welcome_message = """Hello! I'm Event bot.
+        welcome_message = """Hello! I'm Event Bot.
 I can help you with the following:
 1. Agenda of the "Build with AI" workshop
 2. Important Dates of this workshop
