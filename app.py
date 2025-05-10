@@ -120,25 +120,57 @@ body {
     overflow-y: auto;
 }
 
-/* User message bubble */
-.user-message {
-    background-color: #e6e6e6;
-    color: black;
-    border-radius: 15px;
-    padding: 10px 15px;
-    margin: 10px 0;
-    text-align: right;
-    max-width: 70%;
-    margin-left: auto;
+/* Message container with icon - UPDATED FOR TOP ALIGNMENT */
+.message-container {
+    display: flex;
+    align-items: flex-start;  /* Changed from center to flex-start */
+    margin-bottom: 15px;
+    width: 100%;
 }
 
-/* Bot message bubble */
+.message-container.user {
+    flex-direction: row-reverse;
+}
+
+/* Avatar icon styling */
+.avatar-icon {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    background-color: #F0C05A;
+    color: black;
+    border-radius: 50%;
+    font-weight: bold;
+    flex-shrink: 0;
+    margin-right: 8px;
+    margin-top: 5px;  /* Added for top alignment fine-tuning */
+}
+
+.user-avatar-icon {
+    background-color: #FF4B4B;
+    color: white;
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+/* Message bubbles */
 .bot-message {
     background-color: #fcf8ed;
     color: black;
     border-radius: 15px;
     padding: 10px 15px;
-    margin: 10px 0;
+    text-align: left;
+    max-width: 70%;
+}
+
+.user-message {
+    background-color: #e6e6e6;
+    color: black;
+    border-radius: 15px;
+    padding: 10px 15px;
     text-align: left;
     max-width: 70%;
 }
@@ -158,44 +190,6 @@ body {
     color: black !important;
 }
 
-/* Handle chat icons */
-.avatar-icon {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    margin-right: 5px;
-    text-align: center;
-    line-height: 24px;
-    background-color: #F0C05A;
-    color: black;
-    border-radius: 50%;
-    font-weight: bold;
-    vertical-align: middle;
-}
-
-.user-avatar-icon {
-    background-color: #FF4B4B;
-    color: white;
-}
-
-/* Message container with icon */
-.message-container {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 15px;
-}
-
-.message-container.user {
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-}
-
-/* Fix for user avatar position */
-.message-container.user .avatar-icon {
-    margin-right: 0;
-    margin-left: 5px;
-}
-
 /* Force element color overrides */
 .custom-chat-container * {
     color: black !important;
@@ -204,7 +198,7 @@ body {
 """, unsafe_allow_html=True)
 
 # Main app title
-st.title("Build with AI - Event Bot")
+st.title("Build with AI1 - Event Bot")
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
